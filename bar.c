@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
-const int BAR_LENGTH = 50;
+const int BAR_LENGTH = 30;
 const int MAX_TASKS = 5;
 
 typedef struct
@@ -12,27 +14,38 @@ typedef struct
 } Task;
 
 void print_bar(Task task);
+void clear_screen();
 
 int main()
 {
     Task tasks[MAX_TASKS];
+    srand(time(NULL));
 
     for (int i = 0; i < MAX_TASKS; i++)
     {
         tasks[i].id = i + 1;
         tasks[i].progress = 0;
-        tasks[i].step = 3;
+        tasks[i].step = rand() % 5 + 1;
     }
 
     int tasks_incomplete = 1;
 
     while (tasks_incomplete)
     {
-        int tasks_incomplete = 0;
+        tasks_incomplete = 0;
+        clear_screen();
 
         for (int i = 0; i < MAX_TASKS; i++)
         {
-            tasks[i].progress += tasks[i].step;
+            if (tasks[i].progress < 100)
+            {
+                tasks[i].progress += tasks[i].step;
+                if (tasks[i].progress > 100)
+                {
+                    tasks[i].progress = 100;
+                }
+            }
+
             if (tasks[i].progress < 100)
             {
                 tasks_incomplete = 1;
@@ -41,9 +54,18 @@ int main()
         }
         sleep(1);
     }
-    printf("All Tasks Complete!");
+    printf("\nAll Tasks Complete!\n");
 
     return 0;
+}
+
+void clear_screen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
 
 void print_bar(Task task)
@@ -56,6 +78,10 @@ void print_bar(Task task)
         if (i < bars_to_show)
         {
             printf("=");
+        }
+        else if (i == bars_to_show)
+        {
+            printf(">");
         }
         else
         {
